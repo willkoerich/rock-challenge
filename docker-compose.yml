@@ -1,0 +1,62 @@
+version: '3.9'
+services:
+#  app:
+#    container_name: golang_container
+#    environment:
+#      - POSTGRES_USER=${DB_USER}
+#      - POSTGRES_PASSWORD=${DB_PASSWORD}
+#      - POSTGRES_DB=${DB_NAME}
+#      - DATABASE_HOST=${DB_HOST}
+#      - DATABASE_PORT=${DB_PORT}
+#      - APP_SECRET_KEY=${APP_KEY}
+#    tty: true
+#    build: .
+#    ports:
+#      - 8000:8080
+#    restart: on-failure
+#    volumes:
+#      - .:/app
+#    depends_on:
+#     - postgresdb
+#    networks:
+#      - project
+
+  postgresdb:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - '1234:5432'
+    volumes:
+      - "./pg_data:/var/lib/postgresql/data"
+      - "./scripts/init_database.sql:/docker-entrypoint-initdb.d/init_database.sql"
+    networks:
+      - project
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    networks:
+      - project
+
+volumes:
+  pg_data:
+  pg_data_test:
+
+# Networks to be created to facilitate communication between containers
+networks:
+  project:
+    driver: bridge
