@@ -25,12 +25,12 @@ func NewLoginController(repository domain.AccountRepository, passwordGenerator c
 func (controller LoginControllerDefault) Authenticate(ctx context.Context, request domain.AuthenticationRequest) (domain.AuthenticationResponse, error) {
 	account, err := controller.Repository.GetByCPF(ctx, request.CPF)
 	if err != nil {
-		return domain.AuthenticationResponse{}, errors.New(fmt.Sprintf("error getting account by CPF %s. Err: %s", request.CPF, err.Error()))
+		return domain.AuthenticationResponse{}, fmt.Errorf("error getting account by CPF %s. Err: %s", request.CPF, err.Error())
 	}
 
 	err = controller.PasswordGenerator.Compare(account.Secret, request.Secret)
 	if err != nil {
-		return domain.AuthenticationResponse{}, errors.New(fmt.Sprintf("unauthorized"))
+		return domain.AuthenticationResponse{}, errors.New("unauthorized")
 	}
 
 	return domain.AuthenticationResponse{
