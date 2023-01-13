@@ -4,19 +4,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const COST = 8
+
 type (
 	SecurePasswordService interface {
-		Generate(password []byte, cost int) ([]byte, error)
-		Compare(hashedPassword, password []byte) error
+		Generate(password string) (string, error)
+		Compare(hashedPassword, password string) error
 	}
 
 	BcryptSecurePasswordService struct{}
 )
 
-func (service BcryptSecurePasswordService) Generate(password []byte, cost int) ([]byte, error) {
-	return bcrypt.GenerateFromPassword(password, cost)
+func (service BcryptSecurePasswordService) Generate(password string) (string, error) {
+	result, err := bcrypt.GenerateFromPassword([]byte(password), COST)
+	if err != nil {
+		return "", err
+	}
+	return string(result), err
 }
 
-func (service BcryptSecurePasswordService) Compare(hashedPassword, password []byte) error {
-	return bcrypt.CompareHashAndPassword(hashedPassword, password)
+func (service BcryptSecurePasswordService) Compare(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

@@ -1,4 +1,4 @@
-package account
+package domain
 
 import (
 	"context"
@@ -7,9 +7,10 @@ import (
 
 type (
 	CreateRequest struct {
-		Name   string `json:"name"`
-		CPF    string `json:"cpf"`
-		Secret string `json:"secret"`
+		Name    string  `json:"name"`
+		CPF     string  `json:"cpf"`
+		Secret  string  `json:"secret"`
+		Balance float64 `json:"balance"`
 	}
 
 	Account struct {
@@ -21,8 +22,15 @@ type (
 		CreatedAt time.Time `json:"create_at"`
 	}
 
-	Repository interface {
+	AccountRepository interface {
 		Save(ctx context.Context, account Account) (Account, error)
+		GetByID(ctx context.Context, id int) (Account, error)
+		GetByCPF(ctx context.Context, cpf string) (Account, error)
+		GetAll(ctx context.Context) ([]Account, error)
+	}
+
+	AccountController interface {
+		Create(ctx context.Context, account CreateRequest) (Account, error)
 		GetByID(ctx context.Context, id int) (Account, error)
 		GetByCPF(ctx context.Context, cpf string) (Account, error)
 		GetAll(ctx context.Context) ([]Account, error)

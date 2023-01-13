@@ -10,11 +10,11 @@ type SecurePasswordService struct {
 }
 
 // Compare provides a mock function with given fields: hashedPassword, password
-func (_m *SecurePasswordService) Compare(hashedPassword []byte, password []byte) error {
+func (_m *SecurePasswordService) Compare(hashedPassword string, password string) error {
 	ret := _m.Called(hashedPassword, password)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func([]byte, []byte) error); ok {
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
 		r0 = rf(hashedPassword, password)
 	} else {
 		r0 = ret.Error(0)
@@ -23,22 +23,20 @@ func (_m *SecurePasswordService) Compare(hashedPassword []byte, password []byte)
 	return r0
 }
 
-// Generate provides a mock function with given fields: password, cost
-func (_m *SecurePasswordService) Generate(password []byte, cost int) ([]byte, error) {
-	ret := _m.Called(password, cost)
+// Generate provides a mock function with given fields: password
+func (_m *SecurePasswordService) Generate(password string) (string, error) {
+	ret := _m.Called(password)
 
-	var r0 []byte
-	if rf, ok := ret.Get(0).(func([]byte, int) []byte); ok {
-		r0 = rf(password, cost)
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(password)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]byte)
-		}
+		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func([]byte, int) error); ok {
-		r1 = rf(password, cost)
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(password)
 	} else {
 		r1 = ret.Error(1)
 	}

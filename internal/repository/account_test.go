@@ -1,10 +1,11 @@
-package account
+package repository
 
 import (
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/willkoerich/rock-challenge/internal/domain"
 	mocks "github.com/willkoerich/rock-challenge/internal/mocks/plataform/database"
 	"testing"
 	"time"
@@ -18,10 +19,10 @@ func TestCreateAccountSuccessfully(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(-9999, nil)
 
-	result, err := NewRepositoryDefault(driver).
+	result, err := NewAccountRepositoryDefault(driver).
 		Save(
 			context.Background(),
-			Account{
+			domain.Account{
 				Name:      "TestUser",
 				CPF:       "00011122233",
 				Secret:    "mySecret",
@@ -42,10 +43,10 @@ func TestCreateAccountWhenExecuteInsertCommandFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(0, ErrAccountNotExist)
 
-	result, err := NewRepositoryDefault(driver).
+	result, err := NewAccountRepositoryDefault(driver).
 		Save(
 			context.Background(),
-			Account{
+			domain.Account{
 				Name:      "TestUser",
 				CPF:       "00011122233",
 				Secret:    "mySecret",
@@ -54,7 +55,7 @@ func TestCreateAccountWhenExecuteInsertCommandFails(t *testing.T) {
 			},
 		)
 
-	assert.Equal(t, Account{}, result)
+	assert.Equal(t, domain.Account{}, result)
 	assert.Equal(t, ErrAccountNotExist, err)
 }
 
@@ -71,14 +72,14 @@ func TestGetAccountSuccessfully(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(result)
 
-	response, err := NewRepositoryDefault(driver).
+	response, err := NewAccountRepositoryDefault(driver).
 		GetByID(
 			context.Background(),
 			-999,
 		)
 
 	assert.Equal(t, nil, err)
-	assert.Equal(t, Account{}, response)
+	assert.Equal(t, domain.Account{}, response)
 }
 
 func TestGetAccountWhenExecuteQuerySingleElementCommandFails(t *testing.T) {
@@ -94,14 +95,14 @@ func TestGetAccountWhenExecuteQuerySingleElementCommandFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(nil)
 
-	response, err := NewRepositoryDefault(driver).
+	response, err := NewAccountRepositoryDefault(driver).
 		GetByID(
 			context.Background(),
 			-999,
 		)
 
 	assert.Equal(t, ErrAccountNotExist, err)
-	assert.Equal(t, Account{}, response)
+	assert.Equal(t, domain.Account{}, response)
 }
 
 func TestGetAccountWhenResultScanFails(t *testing.T) {
@@ -117,14 +118,14 @@ func TestGetAccountWhenResultScanFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(result)
 
-	response, err := NewRepositoryDefault(driver).
+	response, err := NewAccountRepositoryDefault(driver).
 		GetByID(
 			context.Background(),
 			-999,
 		)
 
 	assert.NotEqual(t, nil, err)
-	assert.Equal(t, Account{}, response)
+	assert.Equal(t, domain.Account{}, response)
 }
 
 func TestGetAllAccountSuccessfully(t *testing.T) {
@@ -149,7 +150,7 @@ func TestGetAllAccountSuccessfully(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything).
 		Return(results, nil)
 
-	response, err := NewRepositoryDefault(driver).GetAll(context.Background())
+	response, err := NewAccountRepositoryDefault(driver).GetAll(context.Background())
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1, len(response))
@@ -177,7 +178,7 @@ func TestGetAllAccountWhenScanFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything).
 		Return(results, nil)
 
-	response, err := NewRepositoryDefault(driver).GetAll(context.Background())
+	response, err := NewAccountRepositoryDefault(driver).GetAll(context.Background())
 
 	assert.NotEqual(t, nil, err)
 	assert.Equal(t, 0, len(response))
@@ -205,7 +206,7 @@ func TestGetAllAccountWhenResultCloseFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything).
 		Return(results, nil)
 
-	response, err := NewRepositoryDefault(driver).GetAll(context.Background())
+	response, err := NewAccountRepositoryDefault(driver).GetAll(context.Background())
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1, len(response))
@@ -233,7 +234,7 @@ func TestGetAllAccountWhenExecuteQueryElementSetCommandFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything).
 		Return(nil, errors.New("error to retrieve accounts"))
 
-	response, err := NewRepositoryDefault(driver).GetAll(context.Background())
+	response, err := NewAccountRepositoryDefault(driver).GetAll(context.Background())
 
 	assert.NotEqual(t, nil, err)
 	assert.Equal(t, 0, len(response))
