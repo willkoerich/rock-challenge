@@ -81,8 +81,8 @@ func (_m *TransferRepository) GetByID(ctx context.Context, id int) (internaldoma
 	return r0, r1
 }
 
-// Save provides a mock function with given fields: ctx, transfer
-func (_m *TransferRepository) Save(ctx context.Context, transfer internaldomain.Transfer) (internaldomain.Transfer, error) {
+// Process provides a mock function with given fields: ctx, transfer
+func (_m *TransferRepository) Process(ctx context.Context, transfer internaldomain.Transfer) (internaldomain.Transfer, error) {
 	ret := _m.Called(ctx, transfer)
 
 	var r0 internaldomain.Transfer

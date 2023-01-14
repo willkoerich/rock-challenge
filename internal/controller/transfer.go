@@ -8,16 +8,39 @@ import (
 
 type (
 	TransferControllerDefault struct {
-		Repository domain.TransferRepository
+		Repository        domain.TransferRepository
+		AccountRepository domain.AccountRepository
 	}
 )
 
-func NewTransferController(repository domain.TransferRepository) domain.TransferController {
-	return TransferControllerDefault{repository}
+func NewTransferController(repository domain.TransferRepository, accountRepository domain.AccountRepository) domain.TransferController {
+	return TransferControllerDefault{
+		Repository:        repository,
+		AccountRepository: accountRepository,
+	}
 }
 
-func (controller TransferControllerDefault) Save(ctx context.Context, transfer domain.Transfer) (domain.Transfer, error) {
-	transfer, err := controller.Repository.Save(ctx, transfer)
+func (controller TransferControllerDefault) Process(ctx context.Context, transfer domain.Transfer) (domain.Transfer, error) {
+
+	origin, err := controller.AccountRepository.GetByID(ctx, transfer.AccountOriginID)
+	if err != nil {
+		return domain.Transfer{}, fmt.Errorf(" unable to retrieve of origin account. Err: %s", err.Error())
+	}
+	destination, err := controller.AccountRepository.GetByID(ctx, transfer.AccountDestinationID)
+	if err != nil {
+		return domain.Transfer{}, fmt.Errorf(" unable to retrieve of destination account. Err: %s", err.Error())
+	}
+
+	if origin.Balance < transfer.Amount {
+		return domain.Transfer{}, fmt.Errorf("  unable to transfer required amount as origin account doesn't have available founds.")
+	}
+
+	origin.Balance -= transfer.Amount
+	destination.Balance += transfer.Amount
+	controller.AccountRepository.Update(ctx, origin)
+	controller.AccountRepository.Update(ctx, origin)
+
+	transfer, err = controller.Repository.Process(ctx, transfer)
 	if err != nil {
 		err = fmt.Errorf("error creating transfer. Err: %s", err.Error())
 	}
@@ -25,9 +48,5 @@ func (controller TransferControllerDefault) Save(ctx context.Context, transfer d
 }
 
 func (controller TransferControllerDefault) GetAll(ctx context.Context) ([]domain.Transfer, error) {
-	transfer, err := controller.Repository.GetAll(ctx)
-	if err != nil {
-		err = fmt.Errorf("error getting accounts. Err: %s", err.Error())
-	}
-	return transfer, err
+	return controller.Repository.GetAll(ctx)
 }

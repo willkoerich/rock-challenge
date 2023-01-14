@@ -19,8 +19,8 @@ func TestCreateTransferSuccessfully(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(-9999, nil)
 
-	response, err := NewTransferRepositoryDefault(driver).
-		Save(
+	response, err := NewTransferRepository(driver).
+		Process(
 			context.Background(),
 			domain.Transfer{
 				AccountOriginID:      -2222,
@@ -42,8 +42,8 @@ func TestCreateTransferWhenExecuteInsertCommandFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(0, errors.New("error"))
 
-	response, err := NewTransferRepositoryDefault(driver).
-		Save(
+	response, err := NewTransferRepository(driver).
+		Process(
 			context.Background(),
 			domain.Transfer{
 				AccountOriginID:      -2222,
@@ -70,7 +70,7 @@ func TestGetTransferByIDSuccessfully(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(result)
 
-	response, err := NewTransferRepositoryDefault(driver).
+	response, err := NewTransferRepository(driver).
 		GetByID(
 			context.Background(),
 			-999,
@@ -93,7 +93,7 @@ func TestGetTransferByIDWhenExecuteQuerySingleElementCommandFails(t *testing.T) 
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(nil)
 
-	response, err := NewTransferRepositoryDefault(driver).
+	response, err := NewTransferRepository(driver).
 		GetByID(
 			context.Background(),
 			-999,
@@ -107,16 +107,16 @@ func TestGetTransferByIDWhenResultScanFails(t *testing.T) {
 
 	result := new(mocks.Result)
 	result.
-		On("Scan", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		On("Scan", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(errors.New("failure to Scan result"))
 
 	driver := new(mocks.Driver)
 	driver.
 		On("ExecuteQuerySingleElementCommand",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(result)
 
-	response, err := NewTransferRepositoryDefault(driver).
+	response, err := NewTransferRepository(driver).
 		GetByID(
 			context.Background(),
 			-999,
@@ -145,10 +145,10 @@ func TestGetTransferByAccountOriginIDSuccessfully(t *testing.T) {
 	driver := new(mocks.Driver)
 	driver.
 		On("ExecuteQueryElementSetCommand",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(results, nil)
 
-	response, err := NewTransferRepositoryDefault(driver).
+	response, err := NewTransferRepository(driver).
 		GetByAccountOriginID(
 			context.Background(),
 			-999,
@@ -177,10 +177,10 @@ func TestGetTransferByAccountOriginIDWhenExecuteQuerySingleElementCommandFails(t
 	driver := new(mocks.Driver)
 	driver.
 		On("ExecuteQueryElementSetCommand",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(nil, errors.New("failed"))
 
-	response, err := NewTransferRepositoryDefault(driver).
+	response, err := NewTransferRepository(driver).
 		GetByAccountOriginID(
 			context.Background(),
 			-999,
@@ -195,10 +195,10 @@ func TestGetTransferByAccountOriginIDWhenResultScanFails(t *testing.T) {
 	results := new(mocks.Results)
 	results.
 		On("Scan", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil)
+		Return(errors.New("failed"))
 	results.
 		On("Close").
-		Return(errors.New("failed"))
+		Return(nil)
 	results.
 		On("Next").
 		Return(true).Once()
@@ -209,17 +209,17 @@ func TestGetTransferByAccountOriginIDWhenResultScanFails(t *testing.T) {
 	driver := new(mocks.Driver)
 	driver.
 		On("ExecuteQueryElementSetCommand",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(results, nil)
 
-	response, err := NewTransferRepositoryDefault(driver).
+	response, err := NewTransferRepository(driver).
 		GetByAccountOriginID(
 			context.Background(),
 			-999,
 		)
 
-	assert.NotEqual(t, errors.New("failed"), err)
-	assert.Equal(t, []domain.Transfer{{}}, response)
+	assert.Equal(t, errors.New("failed"), err)
+	assert.Equal(t, []domain.Transfer{}, response)
 }
 
 func TestGetAllTransfersSuccessfully(t *testing.T) {
@@ -244,7 +244,7 @@ func TestGetAllTransfersSuccessfully(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything).
 		Return(results, nil)
 
-	response, err := NewTransferRepositoryDefault(driver).GetAll(context.Background())
+	response, err := NewTransferRepository(driver).GetAll(context.Background())
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1, len(response))
@@ -272,7 +272,7 @@ func TestGetAllTransfersWhenScanFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything).
 		Return(results, nil)
 
-	response, err := NewTransferRepositoryDefault(driver).GetAll(context.Background())
+	response, err := NewTransferRepository(driver).GetAll(context.Background())
 
 	assert.NotEqual(t, nil, err)
 	assert.Equal(t, 0, len(response))
@@ -300,7 +300,7 @@ func TestGetAllTransfersWhenResultCloseFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything).
 		Return(results, nil)
 
-	response, err := NewTransferRepositoryDefault(driver).GetAll(context.Background())
+	response, err := NewTransferRepository(driver).GetAll(context.Background())
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1, len(response))
@@ -328,7 +328,7 @@ func TestGetAllTransfersWhenExecuteQueryElementSetCommandFails(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything).
 		Return(nil, errors.New("error to retrieve transfers"))
 
-	response, err := NewTransferRepositoryDefault(driver).GetAll(context.Background())
+	response, err := NewTransferRepository(driver).GetAll(context.Background())
 
 	assert.NotEqual(t, nil, err)
 	assert.Equal(t, 0, len(response))

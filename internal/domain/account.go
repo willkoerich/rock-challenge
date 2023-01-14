@@ -22,11 +22,16 @@ type (
 		CreatedAt time.Time `json:"create_at"`
 	}
 
+	BalanceResponse struct {
+		Balance float64 `json:"balance"`
+	}
+
 	AccountRepository interface {
 		Save(ctx context.Context, account Account) (Account, error)
 		GetByID(ctx context.Context, id int) (Account, error)
 		GetByCPF(ctx context.Context, cpf string) (Account, error)
 		GetAll(ctx context.Context) ([]Account, error)
+		Update(ctx context.Context, account Account) error
 	}
 
 	AccountController interface {

@@ -15,6 +15,10 @@ type (
 	BcryptSecurePasswordService struct{}
 )
 
+func NewBcryptSecurePasswordService() SecurePasswordService {
+	return BcryptSecurePasswordService{}
+}
+
 func (service BcryptSecurePasswordService) Generate(password string) (string, error) {
 	result, err := bcrypt.GenerateFromPassword([]byte(password), COST)
 	if err != nil {

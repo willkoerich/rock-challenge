@@ -3,10 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/willkoerich/rock-challenge/internal/domain"
 	"github.com/willkoerich/rock-challenge/internal/plataform/database"
-	"strconv"
 	"time"
 )
 
@@ -18,17 +16,17 @@ type TransferRepositoryDefault struct {
 	driver database.Driver
 }
 
-func NewTransferRepositoryDefault(driver database.Driver) domain.TransferRepository {
+func NewTransferRepository(driver database.Driver) domain.TransferRepository {
 	return TransferRepositoryDefault{
 		driver: driver,
 	}
 }
 
-func (repository TransferRepositoryDefault) Save(ctx context.Context, transfer domain.Transfer) (domain.Transfer, error) {
+func (repository TransferRepositoryDefault) Process(ctx context.Context, transfer domain.Transfer) (domain.Transfer, error) {
 	id, err := repository.driver.ExecuteInsertCommand(
 		ctx,
-		"INSERT INTO transfer(account_origin_id, account_destination_id, created_at) values($1, $2, $3, $4) RETURNING id",
-		transfer.AccountOriginID, strconv.Itoa(transfer.AccountDestinationID), fmt.Sprintf("%f", transfer.Amount), time.Now())
+		"INSERT INTO challenge.transfer(account_origin_id, account_destination_id, amount, created_at) values($1, $2, $3, $4) RETURNING id",
+		transfer.AccountOriginID, transfer.AccountDestinationID, transfer.Amount, time.Now())
 	if err != nil {
 		return domain.Transfer{}, err
 	}
@@ -38,7 +36,7 @@ func (repository TransferRepositoryDefault) Save(ctx context.Context, transfer d
 }
 
 func (repository TransferRepositoryDefault) GetByID(ctx context.Context, id int) (domain.Transfer, error) {
-	row := repository.driver.ExecuteQuerySingleElementCommand(ctx, "SELECT * FROM transfer where id = $1", id)
+	row := repository.driver.ExecuteQuerySingleElementCommand(ctx, "SELECT * FROM challenge.transfer where id = $1", id)
 	var transfer domain.Transfer
 	if row != nil {
 		if err := row.Scan(&transfer.ID, &transfer.AccountOriginID, &transfer.AccountDestinationID, &transfer.Amount, &transfer.CreatedAt); err != nil {
@@ -52,7 +50,7 @@ func (repository TransferRepositoryDefault) GetByID(ctx context.Context, id int)
 }
 
 func (repository TransferRepositoryDefault) GetByAccountOriginID(ctx context.Context, accountOriginID int) ([]domain.Transfer, error) {
-	rows, err := repository.driver.ExecuteQueryElementSetCommand(ctx, "SELECT * FROM transfer where accountOriginID = $1", accountOriginID)
+	rows, err := repository.driver.ExecuteQueryElementSetCommand(ctx, "SELECT * FROM challenge.transfer where accountOriginID = $1", accountOriginID)
 	if err != nil {
 		return []domain.Transfer{}, err
 	}
@@ -70,9 +68,9 @@ func (repository TransferRepositoryDefault) GetByAccountOriginID(ctx context.Con
 }
 
 func (repository TransferRepositoryDefault) GetAll(ctx context.Context) ([]domain.Transfer, error) {
-	rows, err := repository.driver.ExecuteQueryElementSetCommand(ctx, "SELECT * FROM transfer")
+	rows, err := repository.driver.ExecuteQueryElementSetCommand(ctx, "SELECT * FROM challenge.transfer ORDER BY id")
 	if err != nil {
-		return nil, err
+		return []domain.Transfer{}, err
 	}
 	defer rows.Close()
 
@@ -80,9 +78,10 @@ func (repository TransferRepositoryDefault) GetAll(ctx context.Context) ([]domai
 	for rows.Next() {
 		var transfer domain.Transfer
 		if err := rows.Scan(&transfer.ID, &transfer.AccountOriginID, &transfer.AccountDestinationID, &transfer.Amount, &transfer.CreatedAt); err != nil {
-			return nil, err
+			return []domain.Transfer{}, err
 		}
 		all = append(all, transfer)
 	}
+
 	return all, nil
 }

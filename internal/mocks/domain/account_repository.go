@@ -100,6 +100,20 @@ func (_m *AccountRepository) Save(ctx context.Context, account internaldomain.Ac
 	return r0, r1
 }
 
+// Update provides a mock function with given fields: ctx, account
+func (_m *AccountRepository) Update(ctx context.Context, account internaldomain.Account) error {
+	ret := _m.Called(ctx, account)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, internaldomain.Account) error); ok {
+		r0 = rf(ctx, account)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewAccountRepository interface {
 	mock.TestingT
 	Cleanup(func())

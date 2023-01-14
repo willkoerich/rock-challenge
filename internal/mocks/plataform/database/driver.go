@@ -14,6 +14,32 @@ type Driver struct {
 	mock.Mock
 }
 
+// Exec provides a mock function with given fields: ctx, query, args
+func (_m *Driver) Exec(ctx context.Context, query string, args ...interface{}) (plataformdatabase.ExecResult, error) {
+	var _ca []interface{}
+	_ca = append(_ca, ctx, query)
+	_ca = append(_ca, args...)
+	ret := _m.Called(_ca...)
+
+	var r0 plataformdatabase.ExecResult
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...interface{}) plataformdatabase.ExecResult); ok {
+		r0 = rf(ctx, query, args...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(plataformdatabase.ExecResult)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...interface{}) error); ok {
+		r1 = rf(ctx, query, args...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ExecuteInsertCommand provides a mock function with given fields: ctx, command, args
 func (_m *Driver) ExecuteInsertCommand(ctx context.Context, command string, args ...interface{}) (int, error) {
 	var _ca []interface{}

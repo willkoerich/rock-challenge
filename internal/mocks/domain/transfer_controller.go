@@ -37,8 +37,8 @@ func (_m *TransferController) GetAll(ctx context.Context) ([]internaldomain.Tran
 	return r0, r1
 }
 
-// Save provides a mock function with given fields: _a0, transfer
-func (_m *TransferController) Save(_a0 context.Context, transfer internaldomain.Transfer) (internaldomain.Transfer, error) {
+// Process provides a mock function with given fields: _a0, transfer
+func (_m *TransferController) Process(_a0 context.Context, transfer internaldomain.Transfer) (internaldomain.Transfer, error) {
 	ret := _m.Called(_a0, transfer)
 
 	var r0 internaldomain.Transfer

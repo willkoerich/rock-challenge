@@ -14,6 +14,10 @@ type (
 		AccountID int    `json:"account_id"`
 	}
 
+	TokenGenerationResponse struct {
+		AccessToken string `json:"access_token"`
+	}
+
 	LoginController interface {
 		Authenticate(ctx context.Context, credential AuthenticationRequest) (AuthenticationResponse, error)
 	}

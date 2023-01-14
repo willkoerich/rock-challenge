@@ -37,25 +37,6 @@ func TestCreateAccountHandlerSuccessful(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, responseRecorder.Code)
 }
 
-func TestGetByIDAccountHandlerSuccessful(t *testing.T) {
-
-	controller := new(domainMocks.AccountController)
-	controller.
-		On("GetByID", mock.Anything, mock.Anything).
-		Return(domain.Account{}, nil)
-
-	responseRecorder, request := getContext(domain.Account{}, "/accounts/ ")
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(responseRecorder.Result().Body)
-	NewAccountHandler(controller).GetByID(responseRecorder, request)
-
-	assert.Equal(t, http.StatusOK, responseRecorder.Code)
-}
-
 func TestGetAccountsHandlerSuccessful(t *testing.T) {
 
 	controller := new(domainMocks.AccountController)

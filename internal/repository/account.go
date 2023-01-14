@@ -19,7 +19,7 @@ type AccountRepositoryDefault struct {
 	driver database.Driver
 }
 
-func NewAccountRepositoryDefault(driver database.Driver) domain.AccountRepository {
+func NewAccountRepository(driver database.Driver) domain.AccountRepository {
 	return AccountRepositoryDefault{
 		driver: driver,
 	}
@@ -28,7 +28,7 @@ func NewAccountRepositoryDefault(driver database.Driver) domain.AccountRepositor
 func (repository AccountRepositoryDefault) Save(ctx context.Context, account domain.Account) (domain.Account, error) {
 	id, err := repository.driver.ExecuteInsertCommand(
 		ctx,
-		"INSERT INTO account(name, cpf, secret, balance, created_at) values($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO challenge.account(name, cpf, secret, balance, created_at) values($1, $2, $3, $4, $5) RETURNING id",
 		account.Name, account.CPF, account.Secret, fmt.Sprintf("%f", account.Balance), time.Now())
 	if err != nil {
 		return domain.Account{}, err
@@ -39,7 +39,7 @@ func (repository AccountRepositoryDefault) Save(ctx context.Context, account dom
 }
 
 func (repository AccountRepositoryDefault) GetByID(ctx context.Context, id int) (domain.Account, error) {
-	row := repository.driver.ExecuteQuerySingleElementCommand(ctx, "SELECT * FROM account WHERE id = $1", strconv.Itoa(id))
+	row := repository.driver.ExecuteQuerySingleElementCommand(ctx, "SELECT * FROM challenge.account WHERE id = $1", strconv.Itoa(id))
 
 	var account domain.Account
 	if row != nil {
@@ -55,7 +55,7 @@ func (repository AccountRepositoryDefault) GetByID(ctx context.Context, id int) 
 
 func (repository AccountRepositoryDefault) GetByCPF(ctx context.Context, cpf string) (domain.Account, error) {
 	row := repository.driver.ExecuteQuerySingleElementCommand(
-		ctx, "SELECT * FROM account WHERE cpf = $1", cpf)
+		ctx, "SELECT * FROM challenge.account WHERE cpf = $1", cpf)
 	var account domain.Account
 	if row != nil {
 		if err := row.
@@ -71,7 +71,7 @@ func (repository AccountRepositoryDefault) GetByCPF(ctx context.Context, cpf str
 }
 
 func (repository AccountRepositoryDefault) GetAll(ctx context.Context) ([]domain.Account, error) {
-	rows, err := repository.driver.ExecuteQueryElementSetCommand(ctx, "SELECT * FROM account")
+	rows, err := repository.driver.ExecuteQueryElementSetCommand(ctx, "SELECT * FROM challenge.account ORDER BY id")
 	if err != nil {
 		return nil, err
 	}
@@ -87,4 +87,11 @@ func (repository AccountRepositoryDefault) GetAll(ctx context.Context) ([]domain
 		all = append(all, account)
 	}
 	return all, nil
+}
+
+func (repository AccountRepositoryDefault) Update(ctx context.Context, account domain.Account) error {
+	_, err := repository.driver.Exec(
+		ctx,
+		"UPDATE challenge.account SET balance = $1 WHERE id = $2", account.Balance, account.ID)
+	return err
 }
