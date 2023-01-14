@@ -2,8 +2,16 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/willkoerich/rock-challenge/internal/domain"
+)
+
+const (
+	ErrorToRetrieveOriginAccountMessage      = "unable to retrieve of origin account. Err: %s"
+	ErrorToRetrieveDestinationAccountMessage = "unable to retrieve of destination account. Err: %s"
+	ErrorOriginWithoutFoundsMessage          = "unable to transfer required amount as origin account doesn't have available founds"
+	ErrorToCreateTransferMessage             = "error creating transfer. Err: %s"
 )
 
 type (
@@ -24,15 +32,15 @@ func (controller TransferControllerDefault) Process(ctx context.Context, transfe
 
 	origin, err := controller.AccountRepository.GetByID(ctx, transfer.AccountOriginID)
 	if err != nil {
-		return domain.Transfer{}, fmt.Errorf(" unable to retrieve of origin account. Err: %s", err.Error())
+		return domain.Transfer{}, fmt.Errorf(ErrorToRetrieveOriginAccountMessage, err.Error())
 	}
 	destination, err := controller.AccountRepository.GetByID(ctx, transfer.AccountDestinationID)
 	if err != nil {
-		return domain.Transfer{}, fmt.Errorf(" unable to retrieve of destination account. Err: %s", err.Error())
+		return domain.Transfer{}, fmt.Errorf(ErrorToRetrieveDestinationAccountMessage, err.Error())
 	}
 
 	if origin.Balance < transfer.Amount {
-		return domain.Transfer{}, fmt.Errorf("  unable to transfer required amount as origin account doesn't have available founds.")
+		return domain.Transfer{}, errors.New(ErrorOriginWithoutFoundsMessage)
 	}
 
 	origin.Balance -= transfer.Amount
@@ -42,7 +50,7 @@ func (controller TransferControllerDefault) Process(ctx context.Context, transfe
 
 	transfer, err = controller.Repository.Process(ctx, transfer)
 	if err != nil {
-		err = fmt.Errorf("error creating transfer. Err: %s", err.Error())
+		err = fmt.Errorf(ErrorToCreateTransferMessage, err.Error())
 	}
 	return transfer, err
 }

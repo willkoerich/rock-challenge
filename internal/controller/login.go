@@ -8,6 +8,8 @@ import (
 	"github.com/willkoerich/rock-challenge/internal/plataform/crypto"
 )
 
+const UnauthorizedMessage = "unauthorized"
+
 type (
 	LoginControllerDefault struct {
 		Repository        domain.AccountRepository
@@ -25,12 +27,12 @@ func NewLoginController(repository domain.AccountRepository, passwordGenerator c
 func (controller LoginControllerDefault) Authenticate(ctx context.Context, request domain.AuthenticationRequest) (domain.AuthenticationResponse, error) {
 	account, err := controller.Repository.GetByCPF(ctx, request.CPF)
 	if err != nil {
-		return domain.AuthenticationResponse{}, fmt.Errorf("error getting account by CPF %s. Err: %s", request.CPF, err.Error())
+		return domain.AuthenticationResponse{}, fmt.Errorf(ErrorToGetAccountByCPFMessage, request.CPF, err.Error())
 	}
 
 	err = controller.PasswordGenerator.Compare(account.Secret, request.Secret)
 	if err != nil {
-		return domain.AuthenticationResponse{}, errors.New("unauthorized")
+		return domain.AuthenticationResponse{}, errors.New(UnauthorizedMessage)
 	}
 
 	return domain.AuthenticationResponse{
