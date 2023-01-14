@@ -28,22 +28,3 @@ func TestLoginAuthenticateHandlerSuccessful(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, responseRecorder.Code)
 }
-
-/*func TestLoginAuthenticateHandlerFailureWhenBodyIsInvalid(t *testing.T) {
-
-	controller := new(domainMocks.LoginController)
-	controller.
-		On("Authenticate", mock.Anything, mock.Anything).
-		Return(domain.AuthenticationResponse{}, nil)
-
-	responseRecorder, request := getContext(InvalidBody{})
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(responseRecorder.Result().Body)
-	NewLoginHandler(controller).Authenticate(responseRecorder, request)
-
-	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
-}*/

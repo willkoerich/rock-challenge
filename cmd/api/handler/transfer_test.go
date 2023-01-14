@@ -14,10 +14,10 @@ func TestProcessTransferHandlerSuccessful(t *testing.T) {
 
 	controller := new(domainMocks.TransferController)
 	controller.
-		On("Save", mock.Anything, mock.Anything).
+		On("Process", mock.Anything, mock.Anything).
 		Return(domain.Transfer{}, nil)
 
-	responseRecorder, request := getContext(domain.Account{}, "/transfers")
+	responseRecorder, request := getContext(domain.Transfer{}, "/transfers")
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -47,22 +47,3 @@ func TestGetTransfersHandlerSuccessful(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, responseRecorder.Code)
 }
-
-/*func TestLoginAuthenticateHandlerFailureWhenBodyIsInvalid(t *testing.T) {
-
-	controller := new(domainMocks.TransferController)
-	controller.
-		On("Authenticate", mock.Anything, mock.Anything).
-		Return(domain.Transfer{}, nil)
-
-	responseRecorder, request := getContext(InvalidBody{})
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(responseRecorder.Result().Body)
-	NewTransferHandler(controller).Process(responseRecorder, request)
-
-	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
-}*/
