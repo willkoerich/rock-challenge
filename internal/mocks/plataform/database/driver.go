@@ -14,6 +14,29 @@ type Driver struct {
 	mock.Mock
 }
 
+// BeginTransaction provides a mock function with given fields: ctx
+func (_m *Driver) BeginTransaction(ctx context.Context) (plataformdatabase.Transaction, error) {
+	ret := _m.Called(ctx)
+
+	var r0 plataformdatabase.Transaction
+	if rf, ok := ret.Get(0).(func(context.Context) plataformdatabase.Transaction); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(plataformdatabase.Transaction)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Exec provides a mock function with given fields: ctx, query, args
 func (_m *Driver) Exec(ctx context.Context, query string, args ...interface{}) (plataformdatabase.ExecResult, error) {
 	var _ca []interface{}
@@ -40,8 +63,34 @@ func (_m *Driver) Exec(ctx context.Context, query string, args ...interface{}) (
 	return r0, r1
 }
 
-// ExecuteInsertCommand provides a mock function with given fields: ctx, command, args
-func (_m *Driver) ExecuteInsertCommand(ctx context.Context, command string, args ...interface{}) (int, error) {
+// ExecWithTransaction provides a mock function with given fields: ctx, transaction, query, args
+func (_m *Driver) ExecWithTransaction(ctx context.Context, transaction plataformdatabase.Transaction, query string, args ...interface{}) (plataformdatabase.ExecResult, error) {
+	var _ca []interface{}
+	_ca = append(_ca, ctx, transaction, query)
+	_ca = append(_ca, args...)
+	ret := _m.Called(_ca...)
+
+	var r0 plataformdatabase.ExecResult
+	if rf, ok := ret.Get(0).(func(context.Context, plataformdatabase.Transaction, string, ...interface{}) plataformdatabase.ExecResult); ok {
+		r0 = rf(ctx, transaction, query, args...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(plataformdatabase.ExecResult)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, plataformdatabase.Transaction, string, ...interface{}) error); ok {
+		r1 = rf(ctx, transaction, query, args...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ExecuteInsert provides a mock function with given fields: ctx, command, args
+func (_m *Driver) ExecuteInsert(ctx context.Context, command string, args ...interface{}) (int, error) {
 	var _ca []interface{}
 	_ca = append(_ca, ctx, command)
 	_ca = append(_ca, args...)
@@ -57,6 +106,30 @@ func (_m *Driver) ExecuteInsertCommand(ctx context.Context, command string, args
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, string, ...interface{}) error); ok {
 		r1 = rf(ctx, command, args...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ExecuteInsertWithTransaction provides a mock function with given fields: ctx, transaction, command, args
+func (_m *Driver) ExecuteInsertWithTransaction(ctx context.Context, transaction plataformdatabase.Transaction, command string, args ...interface{}) (int, error) {
+	var _ca []interface{}
+	_ca = append(_ca, ctx, transaction, command)
+	_ca = append(_ca, args...)
+	ret := _m.Called(_ca...)
+
+	var r0 int
+	if rf, ok := ret.Get(0).(func(context.Context, plataformdatabase.Transaction, string, ...interface{}) int); ok {
+		r0 = rf(ctx, transaction, command, args...)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, plataformdatabase.Transaction, string, ...interface{}) error); ok {
+		r1 = rf(ctx, transaction, command, args...)
 	} else {
 		r1 = ret.Error(1)
 	}

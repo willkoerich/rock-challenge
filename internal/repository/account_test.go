@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/willkoerich/rock-challenge/internal/domain"
 	mocks "github.com/willkoerich/rock-challenge/internal/mocks/plataform/database"
+	"github.com/willkoerich/rock-challenge/internal/plataform/database"
 	"testing"
 	"time"
 )
@@ -15,8 +16,8 @@ func TestCreateAccountSuccessfully(t *testing.T) {
 
 	driver := new(mocks.Driver)
 	driver.
-		On("ExecuteInsertCommand",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		On("ExecuteInsert",
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(-9999, nil)
 
 	result, err := NewAccountRepository(driver).
@@ -39,7 +40,7 @@ func TestCreateAccountWhenExecuteInsertCommandFails(t *testing.T) {
 
 	driver := new(mocks.Driver)
 	driver.
-		On("ExecuteInsertCommand",
+		On("ExecuteInsert",
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(0, ErrAccountNotExist)
 
@@ -321,13 +322,14 @@ func TestUpdateAccountSuccessfully(t *testing.T) {
 
 	driver := new(mocks.Driver)
 	driver.
-		On("Exec",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		On("ExecWithTransaction",
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(results, nil)
 
 	err := NewAccountRepository(driver).
 		Update(
 			context.Background(),
+			database.PostgresTransaction{},
 			domain.Account{
 				Name:      "TestUser",
 				CPF:       "00011122233",
@@ -342,6 +344,11 @@ func TestUpdateAccountSuccessfully(t *testing.T) {
 
 func TestUpdateAccountWhenExecCommandFails(t *testing.T) {
 
+	transaction := new(mocks.Transaction)
+	transaction.
+		On("Commit").
+		Return(nil)
+
 	results := new(mocks.ExecResult)
 	results.
 		On("LastInsertId", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
@@ -352,13 +359,14 @@ func TestUpdateAccountWhenExecCommandFails(t *testing.T) {
 
 	driver := new(mocks.Driver)
 	driver.
-		On("Exec",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		On("ExecWithTransaction",
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(results, ErrAccountNotExist)
 
 	err := NewAccountRepository(driver).
 		Update(
 			context.Background(),
+			transaction,
 			domain.Account{
 				Name:      "TestUser",
 				CPF:       "00011122233",

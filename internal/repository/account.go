@@ -26,7 +26,7 @@ func NewAccountRepository(driver database.Driver) domain.AccountRepository {
 }
 
 func (repository AccountRepositoryDefault) Save(ctx context.Context, account domain.Account) (domain.Account, error) {
-	id, err := repository.driver.ExecuteInsertCommand(
+	id, err := repository.driver.ExecuteInsert(
 		ctx,
 		"INSERT INTO challenge.account(name, cpf, secret, balance, created_at) values($1, $2, $3, $4, $5) RETURNING id",
 		account.Name, account.CPF, account.Secret, fmt.Sprintf("%f", account.Balance), time.Now())
@@ -89,9 +89,10 @@ func (repository AccountRepositoryDefault) GetAll(ctx context.Context) ([]domain
 	return all, nil
 }
 
-func (repository AccountRepositoryDefault) Update(ctx context.Context, account domain.Account) error {
-	_, err := repository.driver.Exec(
+func (repository AccountRepositoryDefault) Update(ctx context.Context, transaction database.Transaction, account domain.Account) error {
+	_, err := repository.driver.ExecWithTransaction(
 		ctx,
+		transaction,
 		"UPDATE challenge.account SET balance = $1 WHERE id = $2", account.Balance, account.ID)
 	return err
 }

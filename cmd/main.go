@@ -68,7 +68,10 @@ func mapRoutes(accountHandler handler.AccountHandler, loginHandler handler.Login
 
 	r.HandleFunc("/ping", func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusOK)
-		writer.Write([]byte("pong"))
+		_, err := writer.Write([]byte("pong"))
+		if err != nil {
+			return
+		}
 	}).Methods("GET")
 	return r
 }

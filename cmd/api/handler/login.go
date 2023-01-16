@@ -64,7 +64,6 @@ func (handler LoginHandler) Authenticate(writer http.ResponseWriter, request *ht
 	if err != nil {
 		return
 	}
-	return
 }
 
 func (handler LoginHandler) VerifyToken(writer http.ResponseWriter, request *http.Request) (domain.AuthenticationResponse, error) {

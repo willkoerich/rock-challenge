@@ -7,21 +7,26 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/willkoerich/rock-challenge/internal/domain"
 	mocks "github.com/willkoerich/rock-challenge/internal/mocks/plataform/database"
+	"github.com/willkoerich/rock-challenge/internal/plataform/database"
 	"testing"
 	"time"
 )
 
 func TestCreateTransferSuccessfully(t *testing.T) {
 
+	transaction := new(mocks.Transaction)
+	transaction.On("Commit").Return(nil)
+
 	driver := new(mocks.Driver)
 	driver.
-		On("ExecuteInsertCommand",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		On("ExecuteInsertWithTransaction",
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(-9999, nil)
 
 	response, err := NewTransferRepository(driver).
 		Process(
 			context.Background(),
+			transaction,
 			domain.Transfer{
 				AccountOriginID:      -2222,
 				AccountDestinationID: -1111,
@@ -38,13 +43,14 @@ func TestCreateTransferWhenExecuteInsertCommandFails(t *testing.T) {
 
 	driver := new(mocks.Driver)
 	driver.
-		On("ExecuteInsertCommand",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		On("ExecuteInsertWithTransaction",
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(0, errors.New("error"))
 
 	response, err := NewTransferRepository(driver).
 		Process(
 			context.Background(),
+			database.PostgresTransaction{},
 			domain.Transfer{
 				AccountOriginID:      -2222,
 				AccountDestinationID: -1111,

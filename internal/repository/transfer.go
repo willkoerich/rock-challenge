@@ -22,9 +22,11 @@ func NewTransferRepository(driver database.Driver) domain.TransferRepository {
 	}
 }
 
-func (repository TransferRepositoryDefault) Process(ctx context.Context, transfer domain.Transfer) (domain.Transfer, error) {
-	id, err := repository.driver.ExecuteInsertCommand(
+func (repository TransferRepositoryDefault) Process(ctx context.Context, transaction database.Transaction, transfer domain.Transfer) (domain.Transfer, error) {
+
+	id, err := repository.driver.ExecuteInsertWithTransaction(
 		ctx,
+		transaction,
 		"INSERT INTO challenge.transfer(account_origin_id, account_destination_id, amount, created_at) values($1, $2, $3, $4) RETURNING id",
 		transfer.AccountOriginID, transfer.AccountDestinationID, transfer.Amount, time.Now())
 	if err != nil {
@@ -84,4 +86,8 @@ func (repository TransferRepositoryDefault) GetAll(ctx context.Context) ([]domai
 	}
 
 	return all, nil
+}
+
+func (repository TransferRepositoryDefault) BeginTransaction(ctx context.Context) (database.Transaction, error) {
+	return repository.driver.BeginTransaction(ctx)
 }
