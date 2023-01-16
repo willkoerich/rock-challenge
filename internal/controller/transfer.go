@@ -53,15 +53,18 @@ func (controller TransferControllerDefault) Process(ctx context.Context, transfe
 
 	err = controller.AccountRepository.Update(ctx, transaction, origin)
 	if err != nil {
+		transaction.Rollback()
 		return domain.Transfer{}, err
 	}
 	err = controller.AccountRepository.Update(ctx, transaction, destination)
 	if err != nil {
+		transaction.Rollback()
 		return domain.Transfer{}, err
 	}
 
 	transfer, err = controller.Repository.Process(ctx, transaction, transfer)
 	if err != nil {
+		transaction.Rollback()
 		return domain.Transfer{}, fmt.Errorf(ErrorToCreateTransferMessage, err.Error())
 	}
 

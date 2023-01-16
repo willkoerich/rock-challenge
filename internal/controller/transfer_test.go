@@ -78,6 +78,9 @@ func TestController_CreateTransferFailure(t *testing.T) {
 	transaction.
 		On("Commit").
 		Return(nil)
+	transaction.
+		On("Rollback").
+		Return(nil)
 
 	repository := new(domainMock.TransferRepository)
 	repository.
@@ -111,6 +114,9 @@ func TestController_CreateTransferUpdateAccountFailure(t *testing.T) {
 	transaction := new(mocks.Transaction)
 	transaction.
 		On("Commit").
+		Return(nil)
+	transaction.
+		On("Rollback").
 		Return(nil)
 
 	repository := new(domainMock.TransferRepository)

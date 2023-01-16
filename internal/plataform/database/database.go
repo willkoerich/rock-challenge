@@ -22,6 +22,7 @@ type (
 	}
 
 	Transaction interface {
+		Rollback() error
 		Commit() error
 	}
 
@@ -46,6 +47,10 @@ type (
 
 func (transaction PostgresTransaction) Commit() error {
 	return transaction.Tx.Commit()
+}
+
+func (transaction PostgresTransaction) Rollback() error {
+	return transaction.Tx.Rollback()
 }
 
 func NewPostgresDriver(db *sql.DB) Driver {
