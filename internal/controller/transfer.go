@@ -45,13 +45,31 @@ func (controller TransferControllerDefault) Process(ctx context.Context, transfe
 
 	origin.Balance -= transfer.Amount
 	destination.Balance += transfer.Amount
-	controller.AccountRepository.Update(ctx, origin)
-	controller.AccountRepository.Update(ctx, origin)
 
-	transfer, err = controller.Repository.Process(ctx, transfer)
+	transaction, err := controller.Repository.BeginTransaction(ctx)
 	if err != nil {
-		err = fmt.Errorf(ErrorToCreateTransferMessage, err.Error())
+		return domain.Transfer{}, fmt.Errorf(ErrorToCreateTransferMessage, err.Error())
 	}
+
+	err = controller.AccountRepository.Update(ctx, transaction, origin)
+	if err != nil {
+		return domain.Transfer{}, err
+	}
+	err = controller.AccountRepository.Update(ctx, transaction, destination)
+	if err != nil {
+		return domain.Transfer{}, err
+	}
+
+	transfer, err = controller.Repository.Process(ctx, transaction, transfer)
+	if err != nil {
+		return domain.Transfer{}, fmt.Errorf(ErrorToCreateTransferMessage, err.Error())
+	}
+
+	err = transaction.Commit()
+	if err != nil {
+		return domain.Transfer{}, err
+	}
+
 	return transfer, err
 }
 

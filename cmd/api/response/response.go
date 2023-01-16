@@ -23,5 +23,4 @@ func CreateHandlerResponse(writer http.ResponseWriter, code int, message string,
 	if errJon != nil {
 		return
 	}
-	return
 }

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"github.com/willkoerich/rock-challenge/internal/plataform/database"
 	"time"
 )
 
@@ -31,7 +32,7 @@ type (
 		GetByID(ctx context.Context, id int) (Account, error)
 		GetByCPF(ctx context.Context, cpf string) (Account, error)
 		GetAll(ctx context.Context) ([]Account, error)
-		Update(ctx context.Context, account Account) error
+		Update(ctx context.Context, transaction database.Transaction, account Account) error
 	}
 
 	AccountController interface {

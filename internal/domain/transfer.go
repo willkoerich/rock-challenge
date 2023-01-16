@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"github.com/willkoerich/rock-challenge/internal/plataform/database"
 	"time"
 )
 
@@ -15,10 +16,11 @@ type (
 	}
 
 	TransferRepository interface {
-		Process(ctx context.Context, transfer Transfer) (Transfer, error)
+		Process(ctx context.Context, transaction database.Transaction, transfer Transfer) (Transfer, error)
 		GetByID(ctx context.Context, id int) (Transfer, error)
 		GetByAccountOriginID(ctx context.Context, accountOriginID int) ([]Transfer, error)
 		GetAll(ctx context.Context) ([]Transfer, error)
+		BeginTransaction(ctx context.Context) (database.Transaction, error)
 	}
 
 	TransferController interface {

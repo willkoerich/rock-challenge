@@ -7,20 +7,31 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/willkoerich/rock-challenge/internal/domain"
 	domainMock "github.com/willkoerich/rock-challenge/internal/mocks/domain"
+	mocks "github.com/willkoerich/rock-challenge/internal/mocks/plataform/database"
 	"testing"
 )
 
 func TestController_CreateTransferSuccessfully(t *testing.T) {
+
+	transaction := new(mocks.Transaction)
+	transaction.
+		On("Commit").
+		Return(nil)
+
 	repository := new(domainMock.TransferRepository)
 	repository.
 		On("Process",
-			mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(domain.Transfer{}, nil)
+	repository.
+		On("BeginTransaction",
+			mock.Anything).
+		Return(transaction, nil)
 
 	accountRepository := new(domainMock.AccountRepository)
 	accountRepository.
 		On("Update",
-			mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(nil).Twice()
 	accountRepository.
 		On("GetByID",
@@ -62,16 +73,26 @@ func TestController_CreateTransferWhenOriginHasNoFounds(t *testing.T) {
 }
 
 func TestController_CreateTransferFailure(t *testing.T) {
+
+	transaction := new(mocks.Transaction)
+	transaction.
+		On("Commit").
+		Return(nil)
+
 	repository := new(domainMock.TransferRepository)
 	repository.
 		On("Process",
-			mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(domain.Transfer{}, errors.New(" error"))
+	repository.
+		On("BeginTransaction",
+			mock.Anything).
+		Return(transaction, nil)
 
 	accountRepository := new(domainMock.AccountRepository)
 	accountRepository.
 		On("Update",
-			mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(nil).Twice()
 	accountRepository.
 		On("GetByID",
@@ -86,20 +107,30 @@ func TestController_CreateTransferFailure(t *testing.T) {
 }
 
 func TestController_CreateTransferUpdateAccountFailure(t *testing.T) {
+
+	transaction := new(mocks.Transaction)
+	transaction.
+		On("Commit").
+		Return(nil)
+
 	repository := new(domainMock.TransferRepository)
 	repository.
 		On("Process",
 			mock.Anything, mock.Anything).
 		Return(domain.Transfer{}, nil)
+	repository.
+		On("BeginTransaction",
+			mock.Anything).
+		Return(transaction, nil)
 
 	accountRepository := new(domainMock.AccountRepository)
 	accountRepository.
 		On("Update",
-			mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(nil).Once()
 	accountRepository.
 		On("Update",
-			mock.Anything, mock.Anything).
+			mock.Anything, mock.Anything, mock.Anything).
 		Return(errors.New("failed")).Once()
 	accountRepository.
 		On("GetByID",
@@ -110,15 +141,25 @@ func TestController_CreateTransferUpdateAccountFailure(t *testing.T) {
 		Process(context.Background(), domain.Transfer{})
 
 	assert.Equal(t, domain.Transfer{}, transfer)
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 }
 
 func TestController_CreateTransferGetAccountFailure(t *testing.T) {
+
+	transaction := new(mocks.Transaction)
+	transaction.
+		On("Commit").
+		Return(nil)
+
 	repository := new(domainMock.TransferRepository)
 	repository.
 		On("Process",
 			mock.Anything, mock.Anything).
 		Return(domain.Transfer{}, nil)
+	repository.
+		On("BeginTransaction",
+			mock.Anything).
+		Return(transaction, nil)
 
 	accountRepository := new(domainMock.AccountRepository)
 	accountRepository.
@@ -138,11 +179,20 @@ func TestController_CreateTransferGetAccountFailure(t *testing.T) {
 }
 
 func TestController_CreateTransferGetAccountCombination2Failure(t *testing.T) {
+	transaction := new(mocks.Transaction)
+	transaction.
+		On("Commit").
+		Return(nil)
+
 	repository := new(domainMock.TransferRepository)
 	repository.
 		On("Process",
 			mock.Anything, mock.Anything).
 		Return(domain.Transfer{}, nil)
+	repository.
+		On("BeginTransaction",
+			mock.Anything).
+		Return(transaction, nil)
 
 	accountRepository := new(domainMock.AccountRepository)
 	accountRepository.
